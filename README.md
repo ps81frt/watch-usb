@@ -34,6 +34,6 @@ Start-UsbDaemon
 }
 ```
 -
-![Exemple](https://file.garden/aeC5hp5FCBFcUzI_/usbipd.gif)
+![Exemple](./usbipd.gif)
 
 
