@@ -122,7 +122,7 @@ function Start-UsbDaemon {
     $queryBranchement   = "SELECT * FROM __InstanceCreationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' AND TargetInstance.PNPClass = 'USB'"
     $queryDebranchement = "SELECT * FROM __InstanceDeletionEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' AND TargetInstance.PNPClass = 'USB'"
 
-    Log "INFO" "DAEMON USB DÉMARRÉ | mode=évènement-CIM
+    Log "INFO" "DAEMON USB DÉMARRÉ | mode=évènement-CIM"
     Log "INFO" "LOG → $LogFile"
     Log "INFO" "auto-attach=[$($AutoAttach -join ',')] auto-detach=[$($AutoDetach -join ',')]"
 
