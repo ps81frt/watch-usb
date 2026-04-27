@@ -1,6 +1,8 @@
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$OutputEncoding = [System.Text.Encoding]::UTF8
 function watch-usbipd {
+
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    $OutputEncoding = [System.Text.Encoding]::UTF8
+
     Write-Host "Monitoring usbipd (Ctrl+C pour arrêter)..."
 
     $previous = @{}
