@@ -25,11 +25,12 @@ if(!(Test-Path $PROFILE)){
 New-Item -ItemType File -Path $PROFILE -Force | Out-Null
 }
 
-$profile=Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
+# 🔥 FIX IMPORTANT: avoid broken profile crashing Add-Content
+$profileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
 
-if($profile -notmatch "watch-usb"){
-Add-Content $PROFILE "Import-Module watch-usb"
-Add-Content $PROFILE "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8"
+if($profileContent -notmatch "watch-usb"){
+Add-Content $PROFILE "`nImport-Module watch-usb"
+Add-Content $PROFILE "`n[Console]::OutputEncoding=[System.Text.Encoding]::UTF8"
 Add-Content $PROFILE "`$OutputEncoding=[System.Text.Encoding]::UTF8"
 }
 
