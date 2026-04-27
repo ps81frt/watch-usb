@@ -28,6 +28,6 @@ Add-Content $PROFILE "`n[Console]::OutputEncoding=[System.Text.Encoding]::UTF8"
 Add-Content $PROFILE "`$OutputEncoding=[System.Text.Encoding]::UTF8"
 }
 Import-Module Start-UsbDaemon -Force
-Start-UsbDaemonipd
+Start-UsbDaemon
 }
 ```
