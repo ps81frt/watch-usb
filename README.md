@@ -6,6 +6,10 @@ Set-ExecutionPolicy Bypass -Scope CurrentUser -Force
 [Console]::OutputEncoding=[System.Text.Encoding]::UTF8
 $OutputEncoding=[System.Text.Encoding]::UTF8
 winget install --id dorssel.usbipd-win -e
+$env:Path =
+    [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" +
+    [System.Environment]::GetEnvironmentVariable("Path","User")
+
 $moduleRoot="$HOME\Documents\PowerShell\Modules\watch-usb"
 New-Item -ItemType Directory -Path $moduleRoot -Force | Out-Null
 Invoke-WebRequest "https://raw.githubusercontent.com/ps81frt/watch-usb/main/watch-usb.psm1" -OutFile "$moduleRoot\watch-usb.psm1"
