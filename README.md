@@ -13,6 +13,7 @@ $moduleRoot="$HOME\Documents\PowerShell\Modules\Start-UsbDaemon"
 New-Item -ItemType Directory -Path $moduleRoot -Force | Out-Null
 Invoke-WebRequest "https://raw.githubusercontent.com/ps81frt/Start-UsbDaemon/main/Start-UsbDaemon.psm1" -OutFile "$moduleRoot\Start-UsbDaemon.psm1"
 Unblock-File "$moduleRoot\Start-UsbDaemon.psm1"
+New-ModuleManifest -Path "$moduleRoot\Start-UsbDaemon.psd1" -RootModule "Start-UsbDaemon.psm1" -FunctionsToExport "Start-UsbDaemon"
 $psPath=[Environment]::GetEnvironmentVariable("PSModulePath","User")
 if($psPath -notlike "*$HOME\Documents\PowerShell\Modules*"){
     [Environment]::SetEnvironmentVariable("PSModulePath",$psPath+";$HOME\Documents\PowerShell\Modules","User")
