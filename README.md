@@ -11,6 +11,8 @@ $env:Path =
     [System.Environment]::GetEnvironmentVariable("Path","User")
 $moduleRoot="$HOME\Documents\PowerShell\Modules\Start-UsbDaemon"
 New-Item -ItemType Directory -Path $moduleRoot -Force | Out-Null
+Remove-Module Start-UsbDaemon -Force -ErrorAction SilentlyContinue
+Remove-Item "$moduleRoot\Start-UsbDaemon.psm1" -Force -ErrorAction SilentlyContinue
 Invoke-WebRequest "https://raw.githubusercontent.com/ps81frt/Start-UsbDaemon/main/Start-UsbDaemon.psm1" -OutFile "$moduleRoot\Start-UsbDaemon.psm1"
 Invoke-WebRequest "https://raw.githubusercontent.com/ps81frt/Start-UsbDaemon/main/Start-UsbDaemon.psd1" -OutFile "$moduleRoot\Start-UsbDaemon.psd1"
 Unblock-File "$moduleRoot\Start-UsbDaemon.psm1"
