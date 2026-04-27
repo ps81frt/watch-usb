@@ -1,43 +1,83 @@
-function watch-usbipd {
+function Start-UsbDaemon {
 
-    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-    $OutputEncoding = [System.Text.Encoding]::UTF8
+    $state = @{}
+    $logFile = "$HOME\usb-dmesg.log"
 
-    Write-Host "Monitoring usbipd (Ctrl+C pour arrêter)..."
+    function Log($level, $msg) {
 
-    $previous = @{}
+        $time = Get-Date -Format "HH:mm:ss.fff"
+        $line = "[$time] [$level] $msg"
+
+        Add-Content $logFile $line
+
+        switch ($level) {
+            "INFO"  { Write-Host $line -ForegroundColor Gray }
+            "DEV"   { Write-Host $line -ForegroundColor Green }
+            "WARN"  { Write-Host $line -ForegroundColor Yellow }
+            "ACT"   { Write-Host $line -ForegroundColor Cyan }
+            "ERR"   { Write-Host $line -ForegroundColor Red }
+        }
+    }
+
+    function GetType($vidpid) {
+        switch ($vidpid) {
+            "046d:c08b" { return "Mouse (Logitech G502)" }
+            "046d:082c" { return "Webcam (Logitech C615)" }
+            "8087:0029" { return "Bluetooth Adapter" }
+            default     { return "USB Device" }
+        }
+    }
+
+    Log "INFO" "USB DAEMON STARTED (dmesg mode max)"
 
     while ($true) {
+
         $current = @{}
+        $lines = usbipd list 2>$null | Select-Object -Skip 2
 
-        $lines = usbipd list | Select-Object -Skip 2
+        foreach ($l in $lines) {
 
-        foreach ($line in $lines) {
-            if ($line -match "^\s*([0-9-]+)\s+([0-9A-Fa-f:]+)\s+(.+?)\s{2,}(.+)$") {
-                $busid  = $matches[1]
+            if ($l -match "^\s*([0-9-]+)\s+([0-9A-Fa-f:]+)\s+(.+?)\s{2,}(.+)$") {
+
+                $bus = $matches[1]
                 $vidpid = $matches[2]
-                $name   = $matches[3].Trim()
-                $state  = $matches[4].Trim()
+                $name = $matches[3].Trim()
+                $stateStr = $matches[4].Trim()
 
-                $current[$busid] = "$vidpid|$name|$state"
+                $type = GetType $vidpid
 
-                if (-not $previous.ContainsKey($busid)) {
-                    Write-Host "🔌 NEW: $busid $name ($vidpid) [$state]" -ForegroundColor Green
+                $current[$bus] = $vidpid
+
+                # 🟢 NEW DEVICE
+                if (-not $state.ContainsKey($bus)) {
+
+                    Log "DEV" "DEVICE PLUGGED → $type | $name | $vidpid | $bus"
+
+                    # ⚡ rule engine
+                    if ($vidpid -eq "046d:c08b") {
+                        Log "ACT" "AUTO ATTACH → $name ($bus)"
+                        try {
+                            usbipd attach --busid $bus *> $null
+                        } catch {
+                            Log "ERR" "ATTACH FAILED → $bus"
+                        }
+                    }
                 }
-                elseif ($previous[$busid] -ne $current[$busid]) {
-                    Write-Host "🔄 CHANGE: $busid $name ($vidpid) [$state]" -ForegroundColor Yellow
+
+                # 🟡 CHANGE STATE
+                elseif ($state[$bus] -ne $vidpid) {
+                    Log "WARN" "DEVICE STATE CHANGE → $bus | $vidpid"
                 }
             }
         }
 
-        foreach ($busid in $previous.Keys) {
-            if (-not $current.ContainsKey($busid)) {
-                Write-Host "❌ REMOVED: $busid" -ForegroundColor Red
-            }
+        # 🔴 REMOVE EVENTS
+        foreach ($b in $state.Keys | Where-Object { $_ -notin $current.Keys }) {
+            Log "DEV" "DEVICE REMOVED → $b"
         }
 
-        $previous = $current
-        Start-Sleep -Seconds 2
+        $state = $current.Clone()
+
+        Start-Sleep -Milliseconds 500
     }
 }
-Export-ModuleMember -Function watch-usbipd
