@@ -30,6 +30,7 @@ if($profileContent -notmatch "OutputEncoding"){
     Add-Content $PROFILE "`n`$OutputEncoding=[System.Text.Encoding]::UTF8"
 }
 Import-Module Start-UsbDaemon -Force
+Clear-Host
 Start-UsbDaemon
 }
 ```
