@@ -34,7 +34,38 @@ Clear-Host
 Start-UsbDaemon
 }
 ```
+
 -
 ![Exemple](./usbipd.gif)
+
+# Desnstallation.
+
+```powershell
+
+& {
+Set-ExecutionPolicy Bypass -Scope CurrentUser -Force
+winget uninstall --id dorssel.usbipd-win -e --silent
+$env:Path =
+    [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" +
+    [System.Environment]::GetEnvironmentVariable("Path","User")
+$moduleRoot="$HOME\Documents\PowerShell\Modules\Start-UsbDaemon"
+Remove-Module Start-UsbDaemon -Force -ErrorAction SilentlyContinue
+Remove-Item $moduleRoot -Recurse -Force -ErrorAction SilentlyContinue
+$psPath=[Environment]::GetEnvironmentVariable("PSModulePath","User")
+if($psPath -like "*$HOME\Documents\PowerShell\Modules*"){
+    $cleanPath = ($psPath -split ";") | Where-Object {$_ -notlike "*Documents\PowerShell\Modules*"}
+    [Environment]::SetEnvironmentVariable("PSModulePath", ($cleanPath -join ";"), "User")
+}
+if(Test-Path $PROFILE){
+    $content = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
+    if($content){
+        $content = $content -replace "\[Console\]::OutputEncoding=\[System\.Text\.Encoding\]::UTF8",""
+        $content = $content -replace "\$OutputEncoding=\[System\.Text\.Encoding\]::UTF8",""
+        Set-Content $PROFILE $content
+    }
+}
+Clear-Host
+}
+```
 
 
