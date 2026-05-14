@@ -67,5 +67,13 @@ if(Test-Path $PROFILE){
 Clear-Host
 }
 ```
+# DiskMonitor
 
-
+```powershell
+&{
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-WebRequest "https://raw.githubusercontent.com/ps81frt/Start-UsbDaemon/refs/heads/main/Diskmonitor.ps1" -OutFile "Diskmonitor.ps1"
+Unblock-File .\Diskmonitor.ps1
+.\Diskmonitor.ps1
+}
+```
