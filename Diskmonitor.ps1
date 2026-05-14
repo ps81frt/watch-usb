@@ -289,19 +289,19 @@ function Start-DiskDaemon {
                 $issues = @()
                 if ($rel.ReadErrorsTotal    -gt 0)   { $issues += "erreurs-lecture=$($rel.ReadErrorsTotal)" }
                 if ($rel.WriteErrorsTotal   -gt 0)   { $issues += "erreurs-ecriture=$($rel.WriteErrorsTotal)" }
-                if ($rel.Temperature        -gt 55)  { $issues += "temp=$($rel.Temperature)°C" }
+                if ($rel.Temperature        -gt 55)  { $issues += "temp=$($rel.Temperature)C" }
                 if ($rel.Wear              -gt 90)   { $issues += "usure=$($rel.Wear)%" }
                 if ($d.HealthStatus -ne 'Healthy')   { $issues += "sante=$($d.HealthStatus)" }
 
                 if ($issues.Count -gt 0) {
                     $counters.smart++
-                    Log "SMART" ("ALERTE → [{0}] {1} | {2} | {3}" -f $media, $d.FriendlyName, $size, ($issues -join " | "))
+                    Log "SMART" ("ALERTE --> [{0}] {1} | {2} | {3}" -f $media, $d.FriendlyName, $size, ($issues -join " | "))
                 } else {
-                    Log "INFO"  ("SMART OK → [{0}] {1} | {2} | temp=$($rel.Temperature)°C usure=$($rel.Wear)%" -f $media, $d.FriendlyName, $size)
+                    Log "INFO"  ("SMART OK --> [{0}] {1} | {2} | temp=$($rel.Temperature)C usure=$($rel.Wear)%" -f $media, $d.FriendlyName, $size)
                 }
             } catch {
                 $counters.erreur++
-                Log "ERR" ("SMART ECHEC → {0} → {1}" -f $d.FriendlyName, $_.Exception.Message)
+                Log "ERR" ("SMART ECHEC --> {0} --> {1}" -f $d.FriendlyName, $_.Exception.Message)
             }
         }
     }
@@ -319,7 +319,7 @@ function Start-DiskDaemon {
         Log "INFO" "Listeners CIM actifs (hot-plug natif)"
     } catch {
         $counters.erreur++
-        Log "WARN" "CIM events indisponibles → mode polling pur | $($_.Exception.Message)"
+        Log "WARN" "CIM events indisponibles --> mode polling pur | $($_.Exception.Message)"
     }
 
     $script:snapshot = Get-DiskSnapshot
@@ -421,7 +421,7 @@ function Start-DiskDaemon {
                         if ($prev.HealthStatus -ne $d.HealthStatus -or $prev.OperationalStatus -ne $d.OperationalStatus) {
                             $media = Get-MediaLabel $d.MediaType
                             $counters.change++
-                            Log "WARN" ("POLL CHANGEMENT -> [{0}] {1} | sante: {2}→{3} | etat: {4}→{5}" -f `
+                            Log "WARN" ("POLL CHANGEMENT -> [{0}] {1} | sante: {2}-->{3} | etat: {4}-->{5}" -f `
                                 $media, $d.FriendlyName, $prev.HealthStatus, $d.HealthStatus, $prev.OperationalStatus, $d.OperationalStatus)
                         }
                     }
