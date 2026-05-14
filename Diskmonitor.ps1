@@ -6,7 +6,7 @@ function Elevation {
             Start-Process -FilePath "powershell.exe" -ArgumentList $psArgs -Verb RunAs -WindowStyle Normal
             exit
         } catch {
-            Write-Warning "Élévation impossible ou annulée. Le script s'arrête."
+            Write-Warning "Elevation impossible ou annulee. Le script s'arrête."
             exit 1
         }
     }
@@ -55,7 +55,7 @@ function Start-DiskDaemon {
     }
 
     function Write-Stats {
-        Log "STAT" ("uptime=$(Format-Uptime) | connecté={0} déconnecté={1} changement={2} smart={3} erreur={4}" -f `
+        Log "STAT" ("uptime=$(Format-Uptime) | connecte={0} deconnecte={1} changement={2} smart={3} erreur={4}" -f `
             $counters.connecte, $counters.deconnecte, $counters.change, $counters.smart, $counters.erreur)
     }
 
@@ -288,10 +288,10 @@ function Start-DiskDaemon {
 
                 $issues = @()
                 if ($rel.ReadErrorsTotal    -gt 0)   { $issues += "erreurs-lecture=$($rel.ReadErrorsTotal)" }
-                if ($rel.WriteErrorsTotal   -gt 0)   { $issues += "erreurs-écriture=$($rel.WriteErrorsTotal)" }
+                if ($rel.WriteErrorsTotal   -gt 0)   { $issues += "erreurs-ecriture=$($rel.WriteErrorsTotal)" }
                 if ($rel.Temperature        -gt 55)  { $issues += "temp=$($rel.Temperature)°C" }
                 if ($rel.Wear              -gt 90)   { $issues += "usure=$($rel.Wear)%" }
-                if ($d.HealthStatus -ne 'Healthy')   { $issues += "santé=$($d.HealthStatus)" }
+                if ($d.HealthStatus -ne 'Healthy')   { $issues += "sante=$($d.HealthStatus)" }
 
                 if ($issues.Count -gt 0) {
                     $counters.smart++
@@ -310,7 +310,7 @@ function Start-DiskDaemon {
     $queryDeconnecte   = "SELECT * FROM __InstanceDeletionEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_DiskDrive'"
     $queryModification = "SELECT * FROM __InstanceModificationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_DiskDrive'"
 
-    Log "BOOT" "DISK MONITOR DÉMARRÉ | log=$LogFile | polling=${PollingInterval}s | smart=${SmartInterval}s"
+    Log "BOOT" "DISK MONITOR DEMARRE | log=$LogFile | polling=${PollingInterval}s | smart=${SmartInterval}s"
 
     try {
         Register-CimIndicationEvent -Query $queryConnecte     -SourceIdentifier "Disk.Connecte"    -ErrorAction Stop
@@ -324,7 +324,7 @@ function Start-DiskDaemon {
 
     $script:snapshot = Get-DiskSnapshot
 
-    Log "INFO" ("Disques au démarrage : {0}" -f $script:snapshot.Count)
+    Log "INFO" ("Disques au demarrage : {0}" -f $script:snapshot.Count)
     foreach ($d in $script:snapshot.Values) {
         $media  = Get-MediaLabel $d.MediaType
         $size   = if ($d.Size -gt 0) { "{0:N0} GB" -f ($d.Size / 1GB) } else { "?" }
@@ -334,7 +334,7 @@ function Start-DiskDaemon {
             " nvmeVendor=$($d.NvmeVendorId) name=$($d.NvmeVendorName) serial=$($d.SerialNumber)`n       nvme_stor=$($d.NvmeStorageId)`n       nvme_parent=$($d.NvmeParentId)"
         } else { 
             "" 
-        }        Log "INFO" ("  -> [{0}] {1} | {2} | iface={3}{4} | santé={5} | état={6}" -f $media, $d.FriendlyName, $size, $d.InterfaceType, $vidStr, $d.HealthStatus, $d.OperationalStatus)
+        }        Log "INFO" ("  -> [{0}] {1} | {2} | iface={3}{4} | sante={5} | etat={6}" -f $media, $d.FriendlyName, $size, $d.InterfaceType, $vidStr, $d.HealthStatus, $d.OperationalStatus)
     }
 
     Log "INFO" "SMART initial :"
@@ -371,15 +371,15 @@ function Start-DiskDaemon {
                                 }
                                 if ($vid) { $vidStr = " vid=$vid classe=$(Resolve-VidClass $vid)" }
                             }
-                            Log "DEV" "CIM CONNECTÉ -> nom=`"$nom`" type=$media taille=$size iface=$iface$vidStr état=$status"
+                            Log "DEV" "CIM CONNECTE -> nom=`"$nom`" type=$media taille=$size iface=$iface$vidStr etat=$status"
                         }
                         "Disk.Deconnecte" {
                             $counters.deconnecte++
-                            Log "UNPLUG" "CIM DÉCONNECTÉ -> nom=`"$nom`" type=$media taille=$size"
+                            Log "UNPLUG" "CIM DECONNECTE -> nom=`"$nom`" type=$media taille=$size"
                         }
                         "Disk.Modification" {
                             $counters.change++
-                            Log "WARN" "CIM MODIFICATION -> nom=`"$nom`" type=$media état=$status"
+                            Log "WARN" "CIM MODIFICATION -> nom=`"$nom`" type=$media etat=$status"
                         }
                     }
                 } catch {
@@ -414,14 +414,14 @@ function Start-DiskDaemon {
                         " nvmeVendor=$($d.NvmeVendorId) name=$($d.NvmeVendorName) serial=$($d.SerialNumber)`n       nvme_stor=$($d.NvmeStorageId)`n       nvme_parent=$($d.NvmeParentId)"
                         } else { 
                             "" 
-                        }                        Log "DEV" ("POLL APPARU -> [{0}] {1} | {2} | iface={3}{4} | santé={5}" -f $media, $d.FriendlyName, $size, $d.InterfaceType, $vidStr, $d.HealthStatus)
+                        }                        Log "DEV" ("POLL APPARU -> [{0}] {1} | {2} | iface={3}{4} | sante={5}" -f $media, $d.FriendlyName, $size, $d.InterfaceType, $vidStr, $d.HealthStatus)
                     } else {
                         $prev = $script:snapshot[$uid]
                         $d    = $current[$uid]
                         if ($prev.HealthStatus -ne $d.HealthStatus -or $prev.OperationalStatus -ne $d.OperationalStatus) {
                             $media = Get-MediaLabel $d.MediaType
                             $counters.change++
-                            Log "WARN" ("POLL CHANGEMENT -> [{0}] {1} | santé: {2}→{3} | état: {4}→{5}" -f `
+                            Log "WARN" ("POLL CHANGEMENT -> [{0}] {1} | sante: {2}→{3} | etat: {4}→{5}" -f `
                                 $media, $d.FriendlyName, $prev.HealthStatus, $d.HealthStatus, $prev.OperationalStatus, $d.OperationalStatus)
                         }
                     }
@@ -447,7 +447,7 @@ function Start-DiskDaemon {
         Unregister-Event -SourceIdentifier "Disk.Deconnecte"   -ErrorAction SilentlyContinue
         Unregister-Event -SourceIdentifier "Disk.Modification" -ErrorAction SilentlyContinue
         Write-Stats
-        Log "INFO" "DISK MONITOR ARRÊTÉ | uptime=$(Format-Uptime)"
+        Log "INFO" "DISK MONITOR ARRÊTE | uptime=$(Format-Uptime)"
     }
 }
 
